@@ -3,8 +3,15 @@
 #include<cstring>
 #include<cstdlib>
 #include<ctime>
-#include<windows.h>
-#include<conio.h>  //empty(); pop_back(); _getch();
+#include<sstream>
+// Platform-specific includes
+#ifdef _WIN32
+    #include<windows.h>
+    #include<conio.h>
+#else
+    #include<termios.h>
+    #include<unistd.h>
+#endif
 #include <iomanip>
 #include "database.h"
 using namespace std;
@@ -172,17 +179,32 @@ void mainLogin(List* ls){
             mainLogin(ls);
     }
 }
+char getch() {
+#ifdef _WIN32
+    return _getch();
+#else
+    struct termios oldt, newt;
+    char ch;
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    return ch;
+#endif
+}
 string getPassword(){
     string password;
     char ch;
-    while((ch = _getch()) != '\r'){
-          if(ch == '\b'){
+    while((ch = getch()) != '\r' && ch != '\n'){
+          if(ch == '\b' || ch == 127){ // Handle backspace (127 is DEL on some systems)
             if(!password.empty()){
                 password.pop_back();
                 cout << "\b \b";
             }
           }else{
-            password +=ch;
+            password += ch;
             cout << "*";
           }
     }

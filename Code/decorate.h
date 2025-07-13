@@ -2,8 +2,15 @@
 #include<iostream>
 #include<cstdlib>
 #include<ctime>
-#include<windows.h>
-#include<conio.h>  //empty(); pop_back(); _getch();
+#include<sstream>
+// Platform-specific includes
+#ifdef _WIN32
+    #include<windows.h>
+    #include<conio.h>
+#else
+    #include<termios.h>
+    #include<unistd.h>
+#endif
 #include <iomanip>
 #include "structure.h"
 using namespace std;
